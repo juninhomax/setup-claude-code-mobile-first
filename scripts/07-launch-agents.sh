@@ -297,6 +297,55 @@ for agent in "${SELECTED_AGENTS[@]}"; do
   fi
 done
 
+# --- Pre-flight checks ---
+preflight_ok=true
+
+# Check Node.js / npm
+if ! command -v node &>/dev/null; then
+  echo -e "${RED}[MISSING] Node.js is not installed.${NC}"
+  echo -e "  Run: ${BOLD}bash scripts/04-install-claude-code.sh${NC}"
+  preflight_ok=false
+fi
+
+if ! command -v npm &>/dev/null; then
+  echo -e "${RED}[MISSING] npm is not installed.${NC}"
+  echo -e "  Run: ${BOLD}bash scripts/04-install-claude-code.sh${NC}"
+  preflight_ok=false
+fi
+
+# Check Claude Code CLI
+if ! command -v claude &>/dev/null; then
+  echo -e "${RED}[MISSING] Claude Code CLI is not installed.${NC}"
+  echo -e "  Run: ${BOLD}npm install -g @anthropic-ai/claude-code${NC}"
+  preflight_ok=false
+fi
+
+# Check tmux
+if ! command -v tmux &>/dev/null; then
+  echo -e "${RED}[MISSING] tmux is not installed.${NC}"
+  echo -e "  Run: ${BOLD}sudo apt install tmux${NC}"
+  preflight_ok=false
+fi
+
+if [[ "$preflight_ok" == "false" ]]; then
+  echo ""
+  echo -e "${RED}Pre-flight checks failed. Install missing dependencies first.${NC}"
+  exit 1
+fi
+
+# --- Install tmux config (mouse support, mobile optimizations) ---
+TMUX_CONF_SRC="${REPO_DIR}/configs/.tmux.conf"
+TMUX_CONF_DST="$HOME/.tmux.conf"
+
+if [[ -f "$TMUX_CONF_SRC" ]]; then
+  if [[ ! -f "$TMUX_CONF_DST" ]] || ! diff -q "$TMUX_CONF_SRC" "$TMUX_CONF_DST" &>/dev/null; then
+    cp "$TMUX_CONF_SRC" "$TMUX_CONF_DST"
+    echo -e "  ${GREEN}+${NC} tmux config installed: ${TMUX_CONF_DST}"
+    # Reload config in any existing tmux server
+    tmux source-file "$TMUX_CONF_DST" 2>/dev/null || true
+  fi
+fi
+
 # --- Launch ---
 echo -e "${BOLD}=========================================="
 echo -e "  CLAUDE AGENTS — Multi-Agent Workspace"
@@ -373,6 +422,14 @@ tmux send-keys -t "${SESSION}:monitor" \
 
 # Go back to first agent
 tmux select-window -t "${SESSION}:${first_agent}"
+
+# Apply tmux config to session (mouse, prefix, mobile optimizations)
+if [[ -f "$HOME/.tmux.conf" ]]; then
+  tmux source-file "$HOME/.tmux.conf"
+fi
+
+# Ensure mouse is always enabled (critical for mobile)
+tmux set-option -g mouse on
 
 # Custom status bar
 tmux set-option -t "${SESSION}" status-style "bg=colour235,fg=colour136"

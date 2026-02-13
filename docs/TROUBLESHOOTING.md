@@ -124,46 +124,29 @@ tmux source-file ~/.tmux.conf
 
 ## Web access issues
 
-### Caddy not responding
+### Can't access code-server on port 8080
 ```bash
-# Check service
-sudo systemctl status caddy
-sudo journalctl -u caddy -f
+# Check if code-server is running
+sudo systemctl status code-server@$(whoami)
 
-# Validate config
-caddy validate --config /etc/caddy/Caddyfile
+# Check it's listening on 0.0.0.0:8080
+sudo ss -tlnp | grep 8080
+
+# Check config
+cat ~/.config/code-server/config.yaml
+# bind-addr should be: 0.0.0.0:8080
 
 # Restart
-sudo systemctl restart caddy
+sudo systemctl restart code-server@$(whoami)
 ```
-
-### Self-signed certificate warning
-This is expected. In Safari:
-1. Tap "Show Details"
-2. Tap "Visit Website"
-3. Confirm in the dialog
-
-For a proper certificate, set up a domain and update the Caddyfile.
 
 ### Port blocked by firewall
 ```bash
 # Check UFW status
 sudo ufw status verbose
 
-# Add a port
-sudo ufw allow 443/tcp
+# Add port 8080
 sudo ufw allow 8080/tcp
-```
-
-## code-server issues
-
-### Can't access on port 8080
-```bash
-# Check if code-server is running
-sudo systemctl status code-server@$(whoami)
-
-# Check if Caddy is proxying port 8080
-grep -A5 ':8080' /etc/caddy/Caddyfile
 ```
 
 ### Wrong password

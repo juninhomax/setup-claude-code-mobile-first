@@ -61,14 +61,13 @@ claude-agents (tmux session)
 iPhone Safari
     │
     ▼
-┌─────────────┐
-│   Caddy     │ (reverse proxy, auto-TLS)
-│  :8080      │──────► code-server :8443 (VS Code)
-└─────────────┘
+┌─────────────────────────────────────┐
+│  code-server :8080 (VS Code web)   │
+└─────────────────────────────────────┘
 ```
 
-- **code-server**: Full VS Code in the browser. Edit files, run terminals, use extensions.
-- **Caddy**: Handles HTTPS (Let's Encrypt or self-signed) and reverse proxies.
+- **code-server**: Full VS Code in the browser on port 8080. Edit files, run terminals, use extensions.
+- **Caddy** (optional): Only needed if you want HTTPS with a domain (Let's Encrypt). See `configs/Caddyfile.template`.
 
 ## Security model
 

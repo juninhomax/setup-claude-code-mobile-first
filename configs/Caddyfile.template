@@ -1,15 +1,17 @@
 # =============================================================================
-# Caddyfile.template — Reverse proxy for code-server (VS Code web)
+# Caddyfile.template — OPTIONAL reverse proxy for code-server
+#
+# By default, code-server listens directly on 0.0.0.0:8080 (no proxy needed).
+# Use this only if you want HTTPS with a domain (Let's Encrypt auto-TLS).
 #
 # Usage:
-#   With domain:    replace {DOMAIN} with your domain name
-#   Without domain: use the :8080 block below
-#
-# Copy to /etc/caddy/Caddyfile and reload: sudo systemctl reload caddy
+#   1. Install Caddy: sudo apt install caddy
+#   2. Change code-server bind to 127.0.0.1:8443 in config.yaml
+#   3. Copy to /etc/caddy/Caddyfile and reload: sudo systemctl reload caddy
 # =============================================================================
 
-# === OPTION 1: With a domain (Let's Encrypt auto-TLS) ===
-# Uncomment and replace {DOMAIN} with your actual domain.
+# === With a domain (Let's Encrypt auto-TLS) ===
+# Replace {DOMAIN} with your actual domain.
 
 # code.{DOMAIN} {
 #     reverse_proxy 127.0.0.1:8443
@@ -27,13 +29,3 @@
 #         format json
 #     }
 # }
-
-# === OPTION 2: Without domain (self-signed TLS) ===
-# Works with IP access (Tailscale or public IP).
-# Accept the self-signed certificate in your browser.
-
-:8080 {
-    tls internal
-    reverse_proxy 127.0.0.1:8443
-    encode gzip
-}

@@ -5,10 +5,9 @@
 ### Option 1: VS Code web (Safari)
 
 1. Open Safari on your iPhone
-2. Go to `https://<your-server-ip>:8080/`
-3. Accept the self-signed certificate (if no domain)
-4. Enter your `WEB_PASSWORD`
-5. Full VS Code experience in the browser
+2. Go to `http://<your-server-ip>:8080/`
+3. Enter your `WEB_PASSWORD`
+4. Full VS Code experience in the browser
 
 **Tips for Safari:**
 - Add to Home Screen for a full-screen app-like experience
@@ -65,9 +64,8 @@ tmux attach -t claude-agents
 ## Troubleshooting mobile access
 
 ### Safari shows "Not Secure"
-- Expected with self-signed certificates
-- Tap "Show Details" > "Visit Website" to proceed
-- Or set up a domain with Let's Encrypt (see Caddyfile)
+- Expected when accessing via HTTP (default setup)
+- For HTTPS, set up a domain with Caddy (see `configs/Caddyfile.template`)
 
 ### Connection drops
 - tmux preserves your session — just reconnect

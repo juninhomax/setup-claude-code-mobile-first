@@ -112,15 +112,14 @@ echo ""
 
 # --- Optional services ---
 echo "=== OPTIONAL SERVICES ==="
-warn_check "Caddy installed" "command -v caddy"
-warn_check "Caddy service active" "systemctl is-active caddy"
 warn_check "code-server installed" "command -v code-server"
+warn_check "code-server service active" "systemctl is-active code-server@$(whoami)"
 echo ""
 
 # --- Ports ---
 echo "=== LISTENING PORTS ==="
 echo "  (ss -lntp)"
-sudo ss -lntp 2>/dev/null | grep -E '(22|8443|8080)' | sed 's/^/    /' || echo "  (cannot list ports)"
+sudo ss -lntp 2>/dev/null | grep -E '(22|8080)' | sed 's/^/    /' || echo "  (cannot list ports)"
 echo ""
 
 # --- Summary ---
@@ -138,8 +137,8 @@ echo ""
 echo "=== DEBUG COMMANDS ==="
 echo "  systemctl status sshd"
 echo "  systemctl status fail2ban"
-echo "  systemctl status caddy"
-echo "  journalctl -u caddy -f"
+echo "  systemctl status code-server@\$(whoami)"
+echo "  journalctl -u code-server@\$(whoami) -f"
 echo "  sudo ufw status verbose"
 echo "  sudo ss -lntp"
 echo "  tailscale status"

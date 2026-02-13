@@ -64,7 +64,7 @@ bash scripts/07-launch-agents.sh --project ~/workspace/my-project
 
 | Service | URL | Auth |
 |---------|-----|------|
-| VS Code | `https://<IP>:8080/` | your WEB_PASSWORD |
+| VS Code | `http://<IP>:8080/` | your WEB_PASSWORD |
 
 ## Agents
 
@@ -135,7 +135,7 @@ setup-claude-code-mobile-first/
 ├── LICENSE                      # MIT
 ├── config.env.example           # Configuration template
 ├── scripts/                     # Installation scripts (01-08 + setup.sh)
-├── configs/                     # tmux, agents, Caddyfile configs
+├── configs/                     # tmux, agents configs
 ├── claude/                      # .claude/ template for your projects
 │   ├── settings.json            # Permissions + hooks
 │   ├── board.md, team.md        # Coordination files

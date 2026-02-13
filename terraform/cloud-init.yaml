@@ -1,0 +1,223 @@
+#cloud-config
+# =============================================================================
+# cloud-init.yaml — Full VM bootstrap for Claude Code multi-agent workspace
+# =============================================================================
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - git
+  - curl
+  - wget
+  - tmux
+  - build-essential
+  - ripgrep
+  - unzip
+  - zip
+  - jq
+  - htop
+  - tree
+  - ufw
+  - fail2ban
+  - ca-certificates
+  - gnupg
+  - openssl
+
+write_files:
+  # ==================== SSH HARDENING ====================
+  - path: /etc/ssh/sshd_config.d/90-hardening.conf
+    content: |
+      PasswordAuthentication no
+      PermitRootLogin no
+      PubkeyAuthentication yes
+      MaxAuthTries 3
+      MaxSessions 10
+      ClientAliveInterval 60
+      ClientAliveCountMax 120
+      X11Forwarding no
+      LoginGraceTime 30
+    owner: root:root
+    permissions: '0644'
+
+  - path: /etc/ssh/sshd_config.d/91-allowusers.conf
+    content: |
+      AllowUsers azureuser
+    owner: root:root
+    permissions: '0644'
+
+  # ==================== FAIL2BAN ====================
+  - path: /etc/fail2ban/jail.local
+    content: |
+      [DEFAULT]
+      bantime = 1h
+      findtime = 10m
+      maxretry = 3
+      backend = systemd
+      [sshd]
+      enabled = true
+      port = 22
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = 3
+      bantime = 3600
+    owner: root:root
+    permissions: '0644'
+
+  # ==================== CLAUDE ENV ====================
+  - path: /home/azureuser/.claude-env
+    defer: true
+    content: |
+      # Claude Code — Environment variables
+      # Set your Anthropic API key:
+      export ANTHROPIC_API_KEY="sk-ant-YOUR-KEY-HERE"
+    owner: azureuser:azureuser
+    permissions: '0600'
+
+  # ==================== .PROFILE ====================
+  - path: /home/azureuser/.profile
+    defer: true
+    content: |
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      export PATH="$HOME/bin:$PATH"
+      if [ -n "$BASH_VERSION" ]; then
+          [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc"
+      fi
+      [ -f "$HOME/.claude-env" ] && . "$HOME/.claude-env"
+    owner: azureuser:azureuser
+    permissions: '0644'
+
+  # ==================== .TMUX.CONF ====================
+  - path: /home/azureuser/.tmux.conf
+    defer: true
+    content: |
+      unbind C-b
+      set -g prefix C-a
+      bind C-a send-prefix
+      set -g default-terminal "tmux-256color"
+      set -ga terminal-overrides ",xterm-256color:Tc"
+      set -g history-limit 100000
+      set -g mouse on
+      set -g base-index 1
+      setw -g pane-base-index 1
+      set -g renumber-windows on
+      set -g set-clipboard on
+      set -g detach-on-destroy off
+      set -g destroy-unattached off
+      set -g status on
+      set -g status-interval 5
+      set -g status-position bottom
+      set -g status-style "bg=#1e1e2e,fg=#cdd6f4"
+      set -g status-left-length 30
+      set -g status-right-length 60
+      set -g status-left "#[fg=#89b4fa,bold] #S #[fg=#6c7086]| "
+      set -g status-right "#[fg=#6c7086]| #[fg=#a6e3a1]%H:%M #[fg=#6c7086]| #[fg=#f9e2af]%d/%m "
+      setw -g window-status-format "#[fg=#6c7086] #I:#W "
+      setw -g window-status-current-format "#[fg=#89b4fa,bold] #I:#W "
+      bind -n M-Left select-pane -L
+      bind -n M-Right select-pane -R
+      bind -n M-Up select-pane -U
+      bind -n M-Down select-pane -D
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+      bind | split-window -h -c "#{pane_current_path}"
+      bind - split-window -v -c "#{pane_current_path}"
+      unbind '"'
+      unbind %
+      bind c new-window -c "#{pane_current_path}"
+      bind r source-file ~/.tmux.conf \; display "Config reloaded!"
+      setw -g mode-keys vi
+      set -g pane-border-style "fg=#313244"
+      set -g pane-active-border-style "fg=#89b4fa"
+      set -g message-style "fg=#cdd6f4,bg=#1e1e2e"
+      set -sg escape-time 0
+      set -g focus-events on
+      bind w choose-tree -Zs
+      bind Tab next-window
+      bind BTab previous-window
+      setw -g monitor-activity on
+      set -g visual-activity off
+      setw -g window-status-activity-style "fg=#f9e2af,bold"
+    owner: azureuser:azureuser
+    permissions: '0644'
+
+  # ==================== TTYD SERVICE ====================
+  - path: /etc/systemd/system/ttyd.service
+    content: |
+      [Unit]
+      Description=ttyd - Web terminal for Claude Code
+      After=network.target
+      [Service]
+      Type=simple
+      User=root
+      ExecStart=/usr/local/bin/ttyd --port 443 --ssl --ssl-cert /etc/ttyd/cert.pem --ssl-key /etc/ttyd/key.pem --credential user:WEB_PASSWORD_PLACEHOLDER --max-clients 5 --ping-interval 30 --writable su - azureuser
+      Restart=always
+      RestartSec=3
+      [Install]
+      WantedBy=multi-user.target
+    owner: root:root
+    permissions: '0644'
+
+runcmd:
+  # ===== FIX PERMISSIONS =====
+  - chown -R azureuser:azureuser /home/azureuser
+  - mkdir -p /home/azureuser/workspace /home/azureuser/bin
+  - chown -R azureuser:azureuser /home/azureuser
+
+  # ===== SWAP =====
+  - |
+    if [ ! -f /swapfile ]; then
+      fallocate -l 2G /swapfile
+      chmod 600 /swapfile
+      mkswap /swapfile
+      swapon /swapfile
+      echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+
+  # ===== SECURITY =====
+  - systemctl enable fail2ban
+  - systemctl restart fail2ban
+  - systemctl reload sshd
+
+  # ===== NVM + NODE.JS =====
+  - |
+    su -l azureuser -c '
+      curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      nvm install --lts
+      nvm alias default "lts/*"
+    '
+
+  # ===== CLAUDE CODE =====
+  - |
+    su -l azureuser -c '
+      export NVM_DIR="$HOME/.nvm"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      npm install -g @anthropic-ai/claude-code
+    '
+
+  # ===== TTYD BINARY =====
+  - curl -fsSL -o /usr/local/bin/ttyd "https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64"
+  - chmod +x /usr/local/bin/ttyd
+
+  # ===== SELF-SIGNED CERT =====
+  - mkdir -p /etc/ttyd
+  - openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ttyd/key.pem -out /etc/ttyd/cert.pem -subj "/CN=claude-code-agents" 2>/dev/null
+  - chmod 644 /etc/ttyd/cert.pem /etc/ttyd/key.pem
+
+  # ===== START TTYD =====
+  - systemctl daemon-reload
+  - systemctl enable --now ttyd
+
+  # ===== FINAL PERMISSIONS =====
+  - chown -R azureuser:azureuser /home/azureuser
+
+  # ===== DONE =====
+  - touch /home/azureuser/.cloud-init-complete
+  - chown azureuser:azureuser /home/azureuser/.cloud-init-complete
+
+final_message: "Cloud-init complete. Claude Code multi-agent workspace ready."

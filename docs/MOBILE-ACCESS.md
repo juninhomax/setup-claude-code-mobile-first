@@ -1,0 +1,87 @@
+# Mobile Access Guide
+
+## Accessing from iPhone/iPad
+
+### Option 1: Web terminal (Safari)
+
+1. Open Safari on your iPhone
+2. Go to `https://<your-server-ip>/`
+3. Accept the self-signed certificate (if no domain)
+4. Login: `user` / your `WEB_PASSWORD`
+5. You're now in a tmux session
+
+**Tips for Safari:**
+- Add to Home Screen for a full-screen app-like experience
+- The tmux prefix is `Ctrl+A` (easier to type on mobile than `Ctrl+B`)
+- Use the tree view (`Ctrl+A, w`) to see all agents at once
+- Tap on a window name in the status bar to switch
+
+### Option 2: VS Code web (Safari)
+
+1. Go to `https://<your-server-ip>:8080/`
+2. Enter your `WEB_PASSWORD`
+3. Full VS Code experience in the browser
+
+### Option 3: SSH client app
+
+Recommended apps:
+- **Termius** (free tier available)
+- **Blink Shell** (paid, best terminal)
+- **a-Shell** (free, basic)
+
+Connect via SSH:
+```
+ssh user@<your-server-ip>
+# or via Tailscale:
+ssh user@<hostname>
+```
+
+Then attach to the tmux session:
+```
+tmux attach -t claude-agents
+```
+
+### Option 4: Tailscale (recommended for security)
+
+1. Install Tailscale on your iPhone (App Store)
+2. Login with the same account as your server
+3. Access via Tailscale IP (no public ports needed!)
+4. All services accessible securely on the VPN
+
+## tmux on mobile
+
+### Useful shortcuts
+
+| Action | Shortcut | Mobile tip |
+|--------|----------|------------|
+| Switch to agent N | `Ctrl+A, N` | Use number row |
+| Next agent | `Ctrl+A, n` | Quick navigation |
+| Previous agent | `Ctrl+A, p` | Quick navigation |
+| Tree view | `Ctrl+A, w` | Best for overview |
+| Next (alt) | `Ctrl+A, Tab` | Easier on mobile |
+| Scroll up | `Ctrl+A, [` | Then use arrows |
+| Detach | `Ctrl+A, d` | Session persists |
+
+### Mobile keyboard tips
+
+- Use an external Bluetooth keyboard for the best experience
+- On iPad, the Smart Keyboard works well
+- On iPhone, use the `Ctrl` key from the extended keyboard (hold globe/emoji key)
+- Consider installing a keyboard app with proper Ctrl key support
+
+## Troubleshooting mobile access
+
+### Safari shows "Not Secure"
+- Expected with self-signed certificates
+- Tap "Show Details" > "Visit Website" to proceed
+- Or set up a domain with Let's Encrypt (see Caddyfile)
+
+### Connection drops
+- tmux preserves your session — just reconnect
+- ttyd has ping-interval to keep connections alive
+- Use `tmux attach -t claude-agents` after reconnecting
+
+### Small screen layout
+- The tmux status bar shows all agent tabs
+- Use tree view (`Ctrl+A, w`) for easier navigation
+- VS Code web has a responsive layout that works on phones

@@ -1,0 +1,200 @@
+#!/usr/bin/env bash
+# =============================================================================
+# setup.sh — Orchestrator: full Claude Code multi-agent setup in 5 minutes
+#
+# Usage:
+#   sudo bash scripts/setup.sh              # Full install (all steps)
+#   sudo bash scripts/setup.sh --skip 3     # Skip Tailscale
+#   sudo bash scripts/setup.sh --only 4 7   # Only Claude Code + agents
+#   sudo bash scripts/setup.sh --from 5     # Start from step 5
+# =============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# --- Load config ---
+CONFIG_FILE="${SCRIPT_DIR}/../config.env"
+if [[ -f "$CONFIG_FILE" ]]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$CONFIG_FILE"
+  set +a
+else
+  echo "WARNING: config.env not found. Using defaults."
+  echo "  Copy config.env.example to config.env and fill in your values."
+  echo ""
+fi
+
+# --- Variables ---
+WORK_USER="${WORK_USER:-$(logname 2>/dev/null || echo "${SUDO_USER:-}")}"
+export WORK_USER
+
+# --- Steps ---
+STEPS=(
+  "01-bootstrap.sh|Bootstrap OS (packages, user, swap)"
+  "02-harden-ssh-firewall.sh|SSH hardening + UFW + fail2ban"
+  "03-install-tailscale.sh|Tailscale VPN"
+  "04-install-claude-code.sh|Node.js + Claude Code CLI"
+  "05-install-web-terminal.sh|Web terminal (ttyd + Caddy)"
+  "06-install-code-server.sh|VS Code web (code-server)"
+  "07-launch-agents.sh|Launch tmux multi-agents"
+  "08-validate.sh|Validate setup"
+)
+
+# --- Parse arguments ---
+SKIP_STEPS=()
+ONLY_STEPS=()
+FROM_STEP=0
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --skip)
+      shift
+      while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
+        SKIP_STEPS+=("$1")
+        shift
+      done
+      ;;
+    --only)
+      shift
+      while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
+        ONLY_STEPS+=("$1")
+        shift
+      done
+      ;;
+    --from)
+      FROM_STEP="$2"
+      shift 2
+      ;;
+    --help|-h)
+      echo "Usage: sudo bash setup.sh [OPTIONS]"
+      echo ""
+      echo "Options:"
+      echo "  --skip N [N...]  Skip step(s) N"
+      echo "  --only N [N...]  Run only step(s) N"
+      echo "  --from N         Start from step N"
+      echo "  --help           Show this help"
+      echo ""
+      echo "Steps:"
+      for i in "${!STEPS[@]}"; do
+        IFS='|' read -r script desc <<< "${STEPS[$i]}"
+        printf "  %d. %-35s %s\n" "$((i+1))" "$script" "$desc"
+      done
+      exit 0
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# --- Banner ---
+echo "╔══════════════════════════════════════════════════════╗"
+echo "║   CLAUDE CODE MULTI-AGENT SETUP                     ║"
+echo "║   Mobile-First — 5 Minute Setup                     ║"
+echo "╠══════════════════════════════════════════════════════╣"
+echo "║   User: ${WORK_USER:-unknown}"
+echo "║   Config: ${CONFIG_FILE}"
+echo "╚══════════════════════════════════════════════════════╝"
+echo ""
+
+# --- Execute steps ---
+for i in "${!STEPS[@]}"; do
+  step_num=$((i+1))
+  IFS='|' read -r script desc <<< "${STEPS[$i]}"
+
+  # Skip logic
+  if [[ $FROM_STEP -gt 0 && $step_num -lt $FROM_STEP ]]; then
+    echo "[${step_num}/8] SKIP (--from ${FROM_STEP}): ${desc}"
+    continue
+  fi
+
+  if [[ ${#SKIP_STEPS[@]} -gt 0 ]]; then
+    skip=false
+    for s in "${SKIP_STEPS[@]}"; do
+      if [[ "$s" == "$step_num" ]]; then
+        skip=true
+        break
+      fi
+    done
+    if [[ "$skip" == "true" ]]; then
+      echo "[${step_num}/8] SKIP (--skip): ${desc}"
+      continue
+    fi
+  fi
+
+  if [[ ${#ONLY_STEPS[@]} -gt 0 ]]; then
+    found=false
+    for s in "${ONLY_STEPS[@]}"; do
+      if [[ "$s" == "$step_num" ]]; then
+        found=true
+        break
+      fi
+    done
+    if [[ "$found" == "false" ]]; then
+      echo "[${step_num}/8] SKIP (--only): ${desc}"
+      continue
+    fi
+  fi
+
+  echo ""
+  echo "=========================================="
+  echo "  [${step_num}/8] ${desc}"
+  echo "=========================================="
+
+  script_path="${SCRIPT_DIR}/${script}"
+  if [[ ! -f "$script_path" ]]; then
+    echo "  ERROR: script not found: ${script_path}"
+    continue
+  fi
+
+  # Steps 4 (claude code) and 7 (agents) run as user, not root
+  case $step_num in
+    4)
+      su -l "${WORK_USER}" -c "bash ${script_path}"
+      ;;
+    7)
+      echo "  -> Skipping auto-launch (run manually after setup):"
+      echo "     bash ${script_path} --project /path/to/your/project"
+      ;;
+    8)
+      su -l "${WORK_USER}" -c "bash ${script_path}"
+      ;;
+    *)
+      bash "${script_path}"
+      ;;
+  esac
+done
+
+echo ""
+echo "╔══════════════════════════════════════════════════════╗"
+echo "║   SETUP COMPLETE!                                    ║"
+echo "╠══════════════════════════════════════════════════════╣"
+echo "║                                                      ║"
+echo "║  NEXT STEPS:                                         ║"
+echo "║                                                      ║"
+echo "║  1. Configure your Anthropic API key:                ║"
+echo "║     nano ~/.claude-env                               ║"
+echo "║                                                      ║"
+echo "║  2. Reload shell:                                    ║"
+echo "║     source ~/.bashrc                                 ║"
+echo "║                                                      ║"
+echo "║  3. Copy .claude/ template to your project:          ║"
+echo "║     cp -r claude/ ~/workspace/my-project/.claude/    ║"
+echo "║                                                      ║"
+echo "║  4. Launch multi-agent workspace:                    ║"
+echo "║     bash scripts/07-launch-agents.sh \\               ║"
+echo "║       --project ~/workspace/my-project               ║"
+echo "║                                                      ║"
+echo "║  FROM YOUR IPHONE (Safari):                          ║"
+echo "║    https://<IP-or-Tailscale>/     (web terminal)     ║"
+echo "║    https://<IP-or-Tailscale>:8080 (VS Code)          ║"
+echo "║                                                      ║"
+echo "║  TMUX NAVIGATION:                                    ║"
+echo "║    Ctrl+A, 1..9  -> go to agent N                   ║"
+echo "║    Ctrl+A, n/p    -> next/previous agent             ║"
+echo "║    Ctrl+A, w      -> tree view (all agents)          ║"
+echo "║    Ctrl+A, d      -> detach (back to shell)          ║"
+echo "║                                                      ║"
+echo "╚══════════════════════════════════════════════════════╝"

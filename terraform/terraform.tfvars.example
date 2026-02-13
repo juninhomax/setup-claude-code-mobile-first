@@ -1,0 +1,33 @@
+# =============================================================================
+# terraform.tfvars.example — Copy to terraform.tfvars and customize
+# =============================================================================
+
+# Azure region (check your subscription's allowed regions)
+location = "westeurope"
+
+# VM size:
+#   Standard_B2s   = 2 vCPU, 4 GB RAM  (~$30/month) — 1-2 agents
+#   Standard_B2ms  = 2 vCPU, 8 GB RAM  (~$45/month) — 2-3 agents
+#   Standard_B4ms  = 4 vCPU, 16 GB RAM (~$60/month) — 3+ agents
+vm_size = "Standard_B2ms"
+
+# OS disk
+os_disk_size_gb = 30
+
+# SSH key (local path to your public key)
+ssh_public_key_path = "~/.ssh/id_ed25519.pub"
+
+# Option A (true) = Public IP + direct SSH
+# Option B (false) = Tailscale, zero public ports
+enable_public_ip = true
+
+# Restrict SSH to your IP (Option A).
+# Find your IP: curl ifconfig.me
+allowed_ssh_cidr = "0.0.0.0/0"
+
+# Azure subscription ID (required)
+# Find it with: az account show --query id -o tsv
+subscription_id = "YOUR-SUBSCRIPTION-ID-HERE"
+
+# Web password for ttyd + code-server (optional, auto-generated if empty)
+# web_password = "my-strong-password"

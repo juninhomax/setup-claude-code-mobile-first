@@ -4,7 +4,7 @@
 
 ## What you get
 
-- **Secured server**: SSH hardening, UFW firewall, fail2ban, Tailscale VPN
+- **Secured server**: SSH hardening, UFW firewall, Tailscale VPN
 - **Claude Code CLI**: installed and configured with your API key
 - **9 specialized agents** in tmux tabs, each with its own model and system prompt
 - **Web IDE**: code-server (VS Code in the browser)

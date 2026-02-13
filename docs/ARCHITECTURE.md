@@ -67,13 +67,13 @@ iPhone Safari
 ```
 
 - **code-server**: Full VS Code in the browser on port 8080. Edit files, run terminals, use extensions.
-- **Caddy** (optional): Only needed if you want HTTPS with a domain (Let's Encrypt). See `configs/Caddyfile.template`.
+- Access via VPN (Tailscale) or SSH. No reverse proxy needed.
 
 ## Security model
 
-- SSH: key-only auth, root disabled, fail2ban
+- SSH: key-only auth, root disabled
 - Firewall: UFW with minimal open ports
-- VPN: Tailscale (optional, zero-trust)
+- VPN: Tailscale (recommended) — access via SSH or HTTP, no public exposure
 - Web services: password-protected via code-server credentials
 - API keys: stored in `~/.claude-env` with 600 permissions
 

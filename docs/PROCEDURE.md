@@ -49,7 +49,7 @@ sudo bash scripts/setup.sh
 ```
 
 Le script installe tout automatiquement :
-- Packages systeme, swap, securite (SSH, fail2ban, UFW)
+- Packages systeme, swap, securite (SSH, UFW)
 - Node.js + Claude Code CLI
 - VS Code web (code-server)
 
@@ -90,11 +90,9 @@ claude "say hello"
 ### VS Code Web (code-server)
 
 1. Ouvrir Safari sur ton iPhone
-2. Aller a `https://<IP-DU-SERVEUR>:8080/`
-3. Safari affiche un avertissement de certificat (auto-signe) :
-   - Taper **"Afficher les details"** > **"Consulter le site web"**
-4. Entrer le `WEB_PASSWORD`
-5. Tu as VS Code complet dans le navigateur !
+2. Aller a `http://<IP-DU-SERVEUR>:8080/`
+3. Entrer le `WEB_PASSWORD`
+4. Tu as VS Code complet dans le navigateur !
 
 > **Astuce iPhone** : "Ajouter a l'ecran d'accueil" pour un acces plein ecran comme une app native.
 
@@ -197,7 +195,7 @@ L'**orchestrateur** distribue les taches, chaque agent met a jour son statut, le
 
 | Service | URL | Port |
 |---------|-----|------|
-| VS Code web | `https://<IP>:8080/` | 8080 |
+| VS Code web | `http://<IP>:8080/` | 8080 |
 | SSH direct | `ssh user@<IP>` | 22 |
 
 ---
@@ -206,7 +204,7 @@ L'**orchestrateur** distribue les taches, chaque agent met a jour son statut, le
 
 | Probleme | Solution |
 |----------|----------|
-| Safari dit "Non securise" | Normal (certif auto-signe). Accepter le certificat |
+| Safari dit "Non securise" | Normal en HTTP. Utiliser un VPN (Tailscale) pour securiser |
 | Connexion coupee sur iPhone | `tmux attach -t claude-agents` pour reprendre |
 | Agent ne demarre pas | Verifier `~/.claude-env` et relancer le script |
 | Trop cher en API | Changer les agents Opus en Sonnet dans `configs/agents.conf` |

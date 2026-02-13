@@ -44,7 +44,6 @@ apt-get install -y -qq \
   htop \
   tree \
   ufw \
-  fail2ban \
   ca-certificates \
   gnupg \
   lsb-release \

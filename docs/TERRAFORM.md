@@ -41,7 +41,7 @@ terraform apply   # Create resources
 | `os_disk_size_gb` | `30` | Disk size |
 | `enable_public_ip` | `true` | Public IP (false = Tailscale only) |
 | `allowed_ssh_cidr` | `0.0.0.0/0` | SSH source restriction |
-| `web_password` | _(auto)_ | Password for ttyd/code-server |
+| `web_password` | _(auto)_ | Password for code-server |
 
 ## VM sizes guide
 
@@ -56,11 +56,10 @@ terraform apply   # Create resources
 
 After the VM is created, cloud-init automatically:
 1. Installs packages (git, tmux, jq, etc.)
-2. Hardens SSH and enables fail2ban
+2. Hardens SSH
 3. Installs Node.js via nvm
 4. Installs Claude Code CLI
-5. Installs ttyd web terminal with HTTPS
-6. Configures tmux for mobile use
+5. Configures tmux for mobile use
 
 Wait 3-5 minutes for cloud-init to complete:
 ```bash
@@ -96,7 +95,6 @@ bash setup-claude-code-mobile-first/scripts/07-launch-agents.sh \
 
 ### Option A: Public IP (`enable_public_ip = true`)
 - SSH port 22 open (restricted by `allowed_ssh_cidr`)
-- HTTPS port 443 open (web terminal)
 - Port 8080 open (code-server)
 - **Easier** but less secure
 

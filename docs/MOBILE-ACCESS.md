@@ -65,7 +65,7 @@ tmux attach -t claude-agents
 
 ### Safari shows "Not Secure"
 - Expected when accessing via HTTP (default setup)
-- For HTTPS, set up a domain with Caddy (see `configs/Caddyfile.template`)
+- Use Tailscale VPN for secure access without exposing ports publicly
 
 ### Connection drops
 - tmux preserves your session — just reconnect

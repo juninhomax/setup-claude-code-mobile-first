@@ -19,7 +19,6 @@ packages:
   - htop
   - tree
   - ufw
-  - fail2ban
   - ca-certificates
   - gnupg
   - openssl
@@ -43,24 +42,6 @@ write_files:
   - path: /etc/ssh/sshd_config.d/91-allowusers.conf
     content: |
       AllowUsers azureuser
-    owner: root:root
-    permissions: '0644'
-
-  # ==================== FAIL2BAN ====================
-  - path: /etc/fail2ban/jail.local
-    content: |
-      [DEFAULT]
-      bantime = 1h
-      findtime = 10m
-      maxretry = 3
-      backend = systemd
-      [sshd]
-      enabled = true
-      port = 22
-      filter = sshd
-      logpath = /var/log/auth.log
-      maxretry = 3
-      bantime = 3600
     owner: root:root
     permissions: '0644'
 
@@ -144,23 +125,6 @@ write_files:
     owner: azureuser:azureuser
     permissions: '0644'
 
-  # ==================== TTYD SERVICE ====================
-  - path: /etc/systemd/system/ttyd.service
-    content: |
-      [Unit]
-      Description=ttyd - Web terminal for Claude Code
-      After=network.target
-      [Service]
-      Type=simple
-      User=root
-      ExecStart=/usr/local/bin/ttyd --port 443 --ssl --ssl-cert /etc/ttyd/cert.pem --ssl-key /etc/ttyd/key.pem --credential user:WEB_PASSWORD_PLACEHOLDER --max-clients 5 --ping-interval 30 --writable su - azureuser
-      Restart=always
-      RestartSec=3
-      [Install]
-      WantedBy=multi-user.target
-    owner: root:root
-    permissions: '0644'
-
 runcmd:
   # ===== FIX PERMISSIONS =====
   - chown -R azureuser:azureuser /home/azureuser
@@ -178,8 +142,6 @@ runcmd:
     fi
 
   # ===== SECURITY =====
-  - systemctl enable fail2ban
-  - systemctl restart fail2ban
   - systemctl reload sshd
 
   # ===== NVM + NODE.JS =====
@@ -199,19 +161,6 @@ runcmd:
       [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
       npm install -g @anthropic-ai/claude-code
     '
-
-  # ===== TTYD BINARY =====
-  - curl -fsSL -o /usr/local/bin/ttyd "https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64"
-  - chmod +x /usr/local/bin/ttyd
-
-  # ===== SELF-SIGNED CERT =====
-  - mkdir -p /etc/ttyd
-  - openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ttyd/key.pem -out /etc/ttyd/cert.pem -subj "/CN=claude-code-agents" 2>/dev/null
-  - chmod 644 /etc/ttyd/cert.pem /etc/ttyd/key.pem
-
-  # ===== START TTYD =====
-  - systemctl daemon-reload
-  - systemctl enable --now ttyd
 
   # ===== FINAL PERMISSIONS =====
   - chown -R azureuser:azureuser /home/azureuser

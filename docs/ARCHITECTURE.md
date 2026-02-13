@@ -61,20 +61,19 @@ claude-agents (tmux session)
 iPhone Safari
     │
     ▼
-┌─────────────┐
-│   Caddy     │ (reverse proxy, auto-TLS)
-│  :8080      │──────► code-server :8443 (VS Code)
-└─────────────┘
+┌─────────────────────────────────────┐
+│  code-server :8080 (VS Code web)   │
+└─────────────────────────────────────┘
 ```
 
-- **code-server**: Full VS Code in the browser. Edit files, run terminals, use extensions.
-- **Caddy**: Handles HTTPS (Let's Encrypt or self-signed) and reverse proxies.
+- **code-server**: Full VS Code in the browser on port 8080. Edit files, run terminals, use extensions.
+- Access via VPN (Tailscale) or SSH. No reverse proxy needed.
 
 ## Security model
 
-- SSH: key-only auth, root disabled, fail2ban
+- SSH: key-only auth, root disabled
 - Firewall: UFW with minimal open ports
-- VPN: Tailscale (optional, zero-trust)
+- VPN: Tailscale (recommended) — access via SSH or HTTP, no public exposure
 - Web services: password-protected via code-server credentials
 - API keys: stored in `~/.claude-env` with 600 permissions
 

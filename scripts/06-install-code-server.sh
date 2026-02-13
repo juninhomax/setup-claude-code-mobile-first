@@ -19,6 +19,7 @@ fi
 
 WORK_USER="${WORK_USER:-$(logname 2>/dev/null || echo "$SUDO_USER")}"
 WEB_PASSWORD="${WEB_PASSWORD:-change-me-strong-password}"
+CODE_SERVER_BIND="${CODE_SERVER_BIND:-0.0.0.0:8080}"
 
 # --- Install ---
 echo "[1/3] Installing code-server..."
@@ -35,7 +36,7 @@ CS_CONFIG="/home/${WORK_USER}/.config/code-server/config.yaml"
 mkdir -p "$(dirname "${CS_CONFIG}")"
 
 cat > "${CS_CONFIG}" << CSEOF
-bind-addr: 127.0.0.1:8443
+bind-addr: ${CODE_SERVER_BIND}
 auth: password
 password: ${WEB_PASSWORD}
 cert: false
@@ -51,6 +52,6 @@ echo ""
 echo "=========================================="
 echo "  CODE-SERVER INSTALLED"
 echo "  Config: ${CS_CONFIG}"
-echo "  Access: https://<IP>:8080/ (via Caddy)"
+echo "  Access: http://<IP>:8080/"
 echo "  Password: same as WEB_PASSWORD"
 echo "=========================================="

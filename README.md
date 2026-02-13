@@ -4,7 +4,7 @@
 
 ## What you get
 
-- **Secured server**: SSH hardening, UFW firewall, fail2ban, Tailscale VPN
+- **Secured server**: SSH hardening, UFW firewall, Tailscale VPN
 - **Claude Code CLI**: installed and configured with your API key
 - **9 specialized agents** in tmux tabs, each with its own model and system prompt
 - **Web IDE**: code-server (VS Code in the browser)
@@ -64,7 +64,7 @@ bash scripts/07-launch-agents.sh --project ~/workspace/my-project
 
 | Service | URL | Auth |
 |---------|-----|------|
-| VS Code | `https://<IP>:8080/` | your WEB_PASSWORD |
+| VS Code | `http://<IP>:8080/` | your WEB_PASSWORD |
 
 ## Agents
 
@@ -135,7 +135,7 @@ setup-claude-code-mobile-first/
 ├── LICENSE                      # MIT
 ├── config.env.example           # Configuration template
 ├── scripts/                     # Installation scripts (01-08 + setup.sh)
-├── configs/                     # tmux, agents, Caddyfile configs
+├── configs/                     # tmux, agents configs
 ├── claude/                      # .claude/ template for your projects
 │   ├── settings.json            # Permissions + hooks
 │   ├── board.md, team.md        # Coordination files

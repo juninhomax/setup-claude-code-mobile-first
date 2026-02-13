@@ -1,149 +1,157 @@
 # setup-claude-code-mobile-first
 
-> Set up a complete Claude Code multi-agent workspace in 5 minutes, accessible from your iPhone.
+> Installe un workspace Claude Code multi-agents en 5 minutes, accessible depuis ton iPhone.
 
-## What you get
+## Ce que tu obtiens
 
-- **Secured server**: SSH hardening, UFW firewall, Tailscale VPN
-- **Claude Code CLI**: installed and configured with your API key
-- **9 specialized agents** in tmux tabs, each with its own model and system prompt
-- **Web IDE**: code-server (VS Code in the browser)
-- **Azure (optional)**: Terraform to provision the VM automatically
+- **Serveur sécurisé** : SSH hardening, UFW firewall, Tailscale VPN (optionnel)
+- **Claude Code CLI** : installé via npm avec ta clé API
+- **9 agents spécialisés** dans des onglets tmux, chacun avec son modèle et son prompt système
+- **code-server** : VS Code dans le navigateur (`0.0.0.0:8080`)
+- **Azure (optionnel)** : Terraform pour provisionner la VM automatiquement
 
 ## Quick start (5 minutes)
 
-### Prerequisites
+### Prérequis
 
-- An Ubuntu 22.04+ server (VM, VPS, or local)
-- An [Anthropic API key](https://console.anthropic.com) — **required to skip OAuth login on mobile**
-- SSH access to the server
+- Un serveur Ubuntu 22.04+ (VM, VPS ou local)
+- Une [clé API Anthropic](https://console.anthropic.com) — **obligatoire pour contourner le login OAuth sur mobile**
+- Un accès SSH au serveur
 
-### 1. Clone and configure
+### 1. Cloner et configurer
 
 ```bash
 git clone https://github.com/juninhomax/setup-claude-code-mobile-first.git
 cd setup-claude-code-mobile-first
 cp config.env.example config.env
-nano config.env   # Set ANTHROPIC_API_KEY and WEB_PASSWORD (for code-server)
+nano config.env   # Renseigner ANTHROPIC_API_KEY et WEB_PASSWORD
 ```
 
-### 2. Run setup
+### 2. Lancer le setup
 
 ```bash
 sudo bash scripts/setup.sh
 ```
 
-This runs all steps:
-1. Bootstrap OS (packages, user, swap)
-2. Node.js + Claude Code CLI
-3. code-server (VS Code web)
-4. _(agents launched manually)_
-5. Validation
+Le script exécute dans l'ordre :
+1. Bootstrap OS (paquets, utilisateur, swap)
+2. Node.js 20 + Claude Code CLI
+3. code-server (VS Code web sur le port 8080)
+4. Validation
 
-### 2b. Configure API key (skip OAuth)
+### 3. Configurer la clé API (obligatoire sur mobile)
 
 ```bash
-# This is required for mobile access — skips the browser login entirely
 bash scripts/setup-api-key.sh
 ```
 
-> Without an API key, Claude Code will ask for OAuth login via a browser,
-> which is very hard to complete on mobile. Always set your API key first.
+> Sans clé API, Claude Code demande un login OAuth via navigateur,
+> quasi impossible sur mobile. Toujours configurer la clé en premier.
 
-### 3. Launch agents
+### 4. Lancer les agents
 
 ```bash
-# Copy the .claude/ template to your project
-cp -r claude/ ~/workspace/my-project/.claude/
+# Copier le template .claude/ dans ton projet
+cp -r claude/ ~/workspace/mon-projet/.claude/
 
-# Launch 9 agents
-bash scripts/07-launch-agents.sh --project ~/workspace/my-project
+# Lancer les 9 agents
+bash scripts/07-launch-agents.sh --project ~/workspace/mon-projet
 ```
 
-### 4. Access from iPhone
+### 5. Accéder depuis l'iPhone
 
 | Service | URL | Auth |
 |---------|-----|------|
-| VS Code | `http://<IP>:8080/` | your WEB_PASSWORD |
+| VS Code | `http://<IP>:8080/` | WEB_PASSWORD |
 
 ## Agents
 
-| Agent | Model | Role |
-|-------|-------|------|
-| orchestrateur | opus | Central brain — plans, coordinates, reviews |
-| backend-dev | sonnet | REST API, business logic, WebSocket |
+| Agent | Modèle | Rôle |
+|-------|--------|------|
+| orchestrateur | opus | Cerveau central — planifie, coordonne, review |
+| backend-dev | sonnet | API REST, logique métier, WebSocket |
 | frontend-dev | sonnet | UI/UX, SPA, responsive mobile-first |
-| admin-sys | sonnet | Infrastructure, networking, security |
+| admin-sys | sonnet | Infra, réseau, sécurité |
 | devops | sonnet | CI/CD, Docker, cloud, Terraform |
-| testeur | haiku | Unit/integration/E2E tests |
-| reviewer | sonnet | Code review: quality + OWASP security |
-| stabilizer | sonnet | Build, tests, deploy verification |
-| manager | opus | Project tracking, prioritization |
+| testeur | haiku | Tests unitaires/intégration/E2E |
+| reviewer | sonnet | Code review : qualité + sécurité OWASP |
+| stabilizer | sonnet | Vérification build, tests, deploy |
+| manager | opus | Suivi projet, priorisation |
 
-## tmux navigation
+## Navigation tmux
 
-| Shortcut | Action |
-|----------|--------|
-| `Ctrl+A, 1-9` | Go to agent N |
-| `Ctrl+A, n` | Next agent |
-| `Ctrl+A, p` | Previous agent |
-| `Ctrl+A, w` | Tree view (all agents) |
-| `Ctrl+A, d` | Detach (agents continue) |
+| Raccourci | Action |
+|-----------|--------|
+| `Ctrl+A, 1-9` | Aller à l'agent N |
+| `Ctrl+A, n` | Agent suivant |
+| `Ctrl+A, p` | Agent précédent |
+| `Ctrl+A, w` | Vue arborescente (tous les agents) |
+| `Ctrl+A, d` | Détacher (les agents continuent) |
 
-## Selective install
+## Installation sélective
 
 ```bash
-# Skip Tailscale
+# Sauter Tailscale
 sudo bash scripts/setup.sh --skip 3
 
-# Only install Claude Code + agents
+# Installer uniquement Claude Code + agents
 sudo bash scripts/setup.sh --only 4 7
 
-# Start from step 5
+# Reprendre à partir de l'étape 5
 sudo bash scripts/setup.sh --from 5
 ```
 
-## Azure VM (optional)
+## Azure VM (optionnel)
 
-If you don't have a server, provision one with Terraform:
+Si tu n'as pas de serveur, provisionnes-en un avec Terraform :
 
 ```bash
 cd terraform
 cp terraform.tfvars.example terraform.tfvars
-nano terraform.tfvars   # Set subscription_id, ssh key, etc.
+nano terraform.tfvars   # Renseigner subscription_id, clé SSH, etc.
 
 terraform init
 terraform plan
 terraform apply
 ```
 
-See [docs/TERRAFORM.md](docs/TERRAFORM.md) for details.
+Voir [docs/TERRAFORM.md](docs/TERRAFORM.md) pour les détails.
 
 ## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) — How the multi-agent system works
-- [Mobile Access](docs/MOBILE-ACCESS.md) — iPhone/iPad setup guide
-- [Agents](docs/AGENTS.md) — Detailed agent descriptions and customization
-- [Terraform](docs/TERRAFORM.md) — Azure VM provisioning
-- [Troubleshooting](docs/TROUBLESHOOTING.md) — Common issues and fixes
+- [Procédure complète](docs/PROCEDURE.md) — Guide pas-à-pas (FR)
+- [Architecture](docs/ARCHITECTURE.md) — Fonctionnement du système multi-agents
+- [Accès mobile](docs/MOBILE-ACCESS.md) — Guide iPhone/iPad
+- [Agents](docs/AGENTS.md) — Description détaillée et personnalisation
+- [Terraform](docs/TERRAFORM.md) — Provisionnement VM Azure
+- [Troubleshooting](docs/TROUBLESHOOTING.md) — Problèmes courants et solutions
 
-## Project structure
+## Structure du projet
 
 ```
 setup-claude-code-mobile-first/
-├── README.md                    # This file
+├── README.md                    # Ce fichier
 ├── LICENSE                      # MIT
-├── config.env.example           # Configuration template
-├── scripts/                     # Installation scripts (01-08 + setup.sh)
-├── configs/                     # tmux, agents configs
-├── claude/                      # .claude/ template for your projects
+├── config.env.example           # Template de configuration
+├── scripts/
+│   ├── setup.sh                 # Script principal (orchestrateur)
+│   ├── 01-bootstrap.sh          # Paquets OS, utilisateur, swap
+│   ├── 04-install-claude-code.sh # Node.js 20 + Claude Code CLI
+│   ├── 06-install-code-server.sh # VS Code web (port 8080)
+│   ├── 07-launch-agents.sh      # Lance 9 agents dans tmux
+│   ├── 08-validate.sh           # Vérifie que tout fonctionne
+│   └── setup-api-key.sh         # Configure ANTHROPIC_API_KEY
+├── configs/
+│   └── agents.conf              # Définition des 9 agents
+├── claude/                      # Template .claude/ pour tes projets
 │   ├── settings.json            # Permissions + hooks
-│   ├── board.md, team.md        # Coordination files
-│   ├── hooks/                   # Pre/post hooks
-│   ├── rules/                   # Code style, commits, branches
-│   └── skills/                  # 9 agent skill definitions
-├── terraform/                   # Optional Azure VM provisioning
-└── docs/                        # Detailed documentation
+│   ├── board.md, team.md        # Fichiers de coordination
+│   ├── workflow.md              # Workflow des agents
+│   ├── hooks/                   # Hooks pre/post
+│   ├── rules/                   # Style de code, commits, branches
+│   └── skills/                  # Définitions des 9 agents
+├── terraform/                   # Provisionnement Azure (optionnel)
+└── docs/                        # Documentation détaillée
 ```
 
 ## License

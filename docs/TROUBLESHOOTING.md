@@ -1,5 +1,53 @@
 # Troubleshooting
 
+## Authentication — Skip OAuth completely
+
+Claude Code CLI normally asks you to authenticate via OAuth (browser flow).
+This is **very difficult on mobile** (copy-paste issues, `#` in URLs, etc.).
+
+**The solution: set `ANTHROPIC_API_KEY` before running `claude`.**
+When this variable is set, Claude Code skips OAuth entirely.
+
+### Quick fix (if you're stuck on the OAuth screen)
+
+```bash
+# Press Ctrl+C to cancel the OAuth prompt, then:
+export ANTHROPIC_API_KEY="sk-ant-api03-YOUR-KEY-HERE"
+
+# Test it — no OAuth, it just works:
+claude "say hello"
+
+# Save it permanently:
+echo 'export ANTHROPIC_API_KEY="sk-ant-api03-YOUR-KEY-HERE"' > ~/.claude-env
+chmod 600 ~/.claude-env
+source ~/.bashrc
+```
+
+### Get an API key
+
+1. Go to [console.anthropic.com](https://console.anthropic.com)
+2. Sign in (or create an account)
+3. Go to **API Keys** > **Create Key**
+4. Copy the key (starts with `sk-ant-api03-...`)
+5. Add credit ($5 minimum) under **Billing**
+
+### Use the helper script
+
+```bash
+# Interactive setup — paste your key and you're done:
+bash scripts/setup-api-key.sh
+```
+
+### Verify it works
+
+```bash
+# Should print your key (masked):
+echo $ANTHROPIC_API_KEY | cut -c1-15
+
+# Should work without any OAuth prompt:
+claude "say hello"
+```
+
 ## Setup issues
 
 ### `claude: command not found`

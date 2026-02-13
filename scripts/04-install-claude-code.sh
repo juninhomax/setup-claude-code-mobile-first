@@ -17,26 +17,36 @@ if [[ -f "$CONFIG_FILE" ]]; then
 fi
 
 # --- Node.js LTS via nvm ---
+# NOTE: nvm scripts use unbound variables internally, so we must
+# temporarily disable 'set -u' (nounset) around all nvm operations.
 echo "[1/4] Installing Node.js LTS via nvm..."
+
+# Helper: source nvm safely (nvm uses unbound vars)
+load_nvm() {
+  set +u
+  export NVM_DIR="$HOME/.nvm"
+  # shellcheck source=/dev/null
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  set -u
+}
+
 if command -v node &>/dev/null && node -v | grep -qE '^v(20|22|24)'; then
   echo "  -> Node.js already installed: $(node -v)"
 else
   if [[ ! -d "$HOME/.nvm" ]]; then
     curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
   fi
-  export NVM_DIR="$HOME/.nvm"
-  # shellcheck source=/dev/null
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  load_nvm
 
+  set +u
   nvm install --lts
   nvm use --lts
   nvm alias default 'lts/*'
+  set -u
   echo "  -> Node.js installed: $(node -v)"
 fi
 
-export NVM_DIR="$HOME/.nvm"
-# shellcheck source=/dev/null
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+load_nvm
 
 echo "  -> npm: $(npm -v)"
 

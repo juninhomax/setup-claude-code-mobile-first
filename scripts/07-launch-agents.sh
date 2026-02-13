@@ -297,6 +297,21 @@ for agent in "${SELECTED_AGENTS[@]}"; do
   fi
 done
 
+# --- Source nvm if available (needed for node/npm/claude in PATH) ---
+if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  set +u
+  # shellcheck source=/dev/null
+  \. "$NVM_DIR/nvm.sh"
+  set -u
+fi
+
+# --- Source claude-env if available (API key) ---
+if [[ -f "$HOME/.claude-env" ]]; then
+  # shellcheck source=/dev/null
+  source "$HOME/.claude-env"
+fi
+
 # --- Pre-flight checks ---
 preflight_ok=true
 
@@ -385,6 +400,11 @@ for idx in "${!SELECTED_AGENTS[@]}"; do
 
   cat > "${PROMPT_DIR}/launch-${agent}.sh" <<LAUNCHEOF
 #!/usr/bin/env bash
+# Source nvm + claude-env so node/claude are in PATH
+export NVM_DIR="\$HOME/.nvm"
+[ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
+[ -f "\$HOME/.claude-env" ] && source "\$HOME/.claude-env"
+
 PROMPT=\$(cat <<'PROMPTEOF'
 ${prompt}
 PROMPTEOF

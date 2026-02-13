@@ -104,7 +104,7 @@ for i in "${!STEPS[@]}"; do
 
   # Skip logic
   if [[ $FROM_STEP -gt 0 && $step_num -lt $FROM_STEP ]]; then
-    echo "[${step_num}/8] SKIP (--from ${FROM_STEP}): ${desc}"
+    echo "[${step_num}/${#STEPS[@]}] SKIP (--from ${FROM_STEP}): ${desc}"
     continue
   fi
 
@@ -117,7 +117,7 @@ for i in "${!STEPS[@]}"; do
       fi
     done
     if [[ "$skip" == "true" ]]; then
-      echo "[${step_num}/8] SKIP (--skip): ${desc}"
+      echo "[${step_num}/${#STEPS[@]}] SKIP (--skip): ${desc}"
       continue
     fi
   fi
@@ -131,14 +131,14 @@ for i in "${!STEPS[@]}"; do
       fi
     done
     if [[ "$found" == "false" ]]; then
-      echo "[${step_num}/8] SKIP (--only): ${desc}"
+      echo "[${step_num}/${#STEPS[@]}] SKIP (--only): ${desc}"
       continue
     fi
   fi
 
   echo ""
   echo "=========================================="
-  echo "  [${step_num}/8] ${desc}"
+  echo "  [${step_num}/${#STEPS[@]}] ${desc}"
   echo "=========================================="
 
   script_path="${SCRIPT_DIR}/${script}"
@@ -147,19 +147,41 @@ for i in "${!STEPS[@]}"; do
     continue
   fi
 
-  # Steps 4 (claude code) and 7 (agents) run as user, not root
+  # Step 1: bootstrap (root) + tmux config
+  # Step 2: claude code (user, no root)
+  # Step 3: web terminal (root)
+  # Step 4: code-server (root)
+  # Step 5: launch agents (manual)
+  # Step 6: validate (user)
   case $step_num in
-    4)
+    1)
+      # Bootstrap: run as root, then install tmux config for user
+      bash "${script_path}"
+      echo ""
+      echo "  -> Installing tmux config for user '${WORK_USER}'..."
+      TMUX_CONF_SRC="${SCRIPT_DIR}/../configs/.tmux.conf"
+      TMUX_CONF_DST="/home/${WORK_USER}/.tmux.conf"
+      if [[ -f "$TMUX_CONF_SRC" ]]; then
+        cp "$TMUX_CONF_SRC" "$TMUX_CONF_DST"
+        chown "${WORK_USER}:${WORK_USER}" "$TMUX_CONF_DST"
+        echo "  -> tmux config installed: ${TMUX_CONF_DST}"
+      fi
+      ;;
+    2)
+      # Claude Code: install as user (nvm + npm)
       su -l "${WORK_USER}" -c "bash ${script_path}"
       ;;
-    7)
+    5)
+      # Agents: skip auto-launch, user runs manually with --project
       echo "  -> Skipping auto-launch (run manually after setup):"
       echo "     bash ${script_path} --project /path/to/your/project"
       ;;
-    8)
+    6)
+      # Validate: run as user
       su -l "${WORK_USER}" -c "bash ${script_path}"
       ;;
     *)
+      # Steps 3, 4: run as root
       bash "${script_path}"
       ;;
   esac

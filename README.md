@@ -16,7 +16,7 @@
 ### Prerequisites
 
 - An Ubuntu 22.04+ server (VM, VPS, or local)
-- An [Anthropic API key](https://console.anthropic.com)
+- An [Anthropic API key](https://console.anthropic.com) — **required to skip OAuth login on mobile**
 - SSH access to the server
 
 ### 1. Clone and configure
@@ -43,6 +43,16 @@ This runs all 8 steps:
 6. code-server (VS Code web)
 7. _(agents launched manually)_
 8. Validation
+
+### 2b. Configure API key (skip OAuth)
+
+```bash
+# This is required for mobile access — skips the browser login entirely
+bash scripts/setup-api-key.sh
+```
+
+> Without an API key, Claude Code will ask for OAuth login via a browser,
+> which is very hard to complete on mobile. Always set your API key first.
 
 ### 3. Launch agents
 

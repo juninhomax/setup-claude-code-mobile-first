@@ -57,10 +57,20 @@ echo "  -> Claude Code installed: $(claude --version 2>/dev/null || echo 'check 
 
 # --- API key configuration ---
 echo "[3/4] Configuring Anthropic API key..."
+echo ""
+echo "  IMPORTANT: Setting ANTHROPIC_API_KEY lets you skip OAuth login."
+echo "  This is essential for mobile access (no browser copy-paste needed)."
+echo ""
 
 ENV_FILE="$HOME/.claude-env"
+ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
+
+# If no key is set, try to read from config.env
+if [[ -z "$ANTHROPIC_KEY" || "$ANTHROPIC_KEY" == "sk-ant-..." ]]; then
+  ANTHROPIC_KEY="sk-ant-YOUR-KEY-HERE"
+fi
+
 if [[ ! -f "${ENV_FILE}" ]]; then
-  ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-sk-ant-YOUR-KEY-HERE}"
   cat > "${ENV_FILE}" << ENVEOF
 # === Claude Code — Environment variables ===
 export ANTHROPIC_API_KEY="${ANTHROPIC_KEY}"
@@ -70,11 +80,30 @@ export ANTHROPIC_API_KEY="${ANTHROPIC_KEY}"
 ENVEOF
   chmod 600 "${ENV_FILE}"
   echo "  -> File ${ENV_FILE} created (chmod 600)."
-  if [[ "$ANTHROPIC_KEY" == "sk-ant-YOUR-KEY-HERE" || "$ANTHROPIC_KEY" == "sk-ant-..." ]]; then
-    echo "  -> EDIT IT with your API key: nano ${ENV_FILE}"
-  fi
 else
   echo "  -> File ${ENV_FILE} already exists."
+  # Re-read existing key
+  source "${ENV_FILE}" 2>/dev/null || true
+  ANTHROPIC_KEY="${ANTHROPIC_API_KEY:-}"
+fi
+
+# Validate key format
+if [[ -z "$ANTHROPIC_KEY" || "$ANTHROPIC_KEY" == "sk-ant-YOUR-KEY-HERE" || "$ANTHROPIC_KEY" == "sk-ant-..." ]]; then
+  echo ""
+  echo "  =========================================="
+  echo "  WARNING: No valid API key detected!"
+  echo "  Without an API key, Claude will ask for"
+  echo "  OAuth login (difficult on mobile)."
+  echo ""
+  echo "  To fix:"
+  echo "    bash scripts/setup-api-key.sh"
+  echo "  Or manually:"
+  echo "    nano ~/.claude-env"
+  echo "  =========================================="
+  echo ""
+elif [[ "$ANTHROPIC_KEY" == sk-ant-api03-* ]]; then
+  echo "  -> API key configured (starts with ${ANTHROPIC_KEY:0:15}...)"
+  echo "  -> OAuth will be SKIPPED — direct API access enabled."
 fi
 
 # Add sourcing to .bashrc if absent

@@ -122,17 +122,7 @@ tmux show -g prefix
 tmux source-file ~/.tmux.conf
 ```
 
-## Web terminal issues
-
-### ttyd not responding
-```bash
-# Check service
-sudo systemctl status ttyd
-sudo journalctl -u ttyd -f
-
-# Restart
-sudo systemctl restart ttyd
-```
+## Web access issues
 
 ### Caddy not responding
 ```bash

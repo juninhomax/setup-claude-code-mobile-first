@@ -36,7 +36,7 @@ Remplir les valeurs **obligatoires** :
 # Cle API Anthropic
 ANTHROPIC_API_KEY="sk-ant-api03-TA-CLE-ICI"
 
-# Mot de passe pour le terminal web et VS Code (choisis un vrai mdp !)
+# Mot de passe pour VS Code web (choisis un vrai mdp !)
 WEB_PASSWORD="MonSuperMotDePasse123!"
 ```
 
@@ -51,7 +51,6 @@ sudo bash scripts/setup.sh
 Le script installe tout automatiquement :
 - Packages systeme, swap, securite (SSH, fail2ban, UFW)
 - Node.js + Claude Code CLI
-- Terminal web (ttyd) + proxy HTTPS (Caddy)
 - VS Code web (code-server)
 
 Options utiles :
@@ -88,22 +87,12 @@ claude "say hello"
 
 ## Etape 4 — Acceder depuis l'iPhone
 
-### Terminal Web (ttyd)
-
-1. Ouvrir Safari sur ton iPhone
-2. Aller a `https://<IP-DU-SERVEUR>/`
-3. Safari affiche un avertissement de certificat (auto-signe) :
-   - Taper **"Afficher les details"** > **"Consulter le site web"**
-4. Se connecter :
-   - Utilisateur : `user`
-   - Mot de passe : celui defini dans `WEB_PASSWORD`
-5. Tu es dans un terminal sur le serveur !
-
 ### VS Code Web (code-server)
 
-1. Ouvrir Safari
+1. Ouvrir Safari sur ton iPhone
 2. Aller a `https://<IP-DU-SERVEUR>:8080/`
-3. Accepter le certificat (meme manip)
+3. Safari affiche un avertissement de certificat (auto-signe) :
+   - Taper **"Afficher les details"** > **"Consulter le site web"**
 4. Entrer le `WEB_PASSWORD`
 5. Tu as VS Code complet dans le navigateur !
 
@@ -113,7 +102,7 @@ claude "say hello"
 
 ## Etape 5 — Lancer les agents multi-Claude
 
-Depuis le terminal web (ou SSH) :
+Depuis VS Code web ou SSH :
 
 ```bash
 # Cloner ou creer ton projet
@@ -208,7 +197,6 @@ L'**orchestrateur** distribue les taches, chaque agent met a jour son statut, le
 
 | Service | URL | Port |
 |---------|-----|------|
-| Terminal web | `https://<IP>/` | 443 |
 | VS Code web | `https://<IP>:8080/` | 8080 |
 | SSH direct | `ssh user@<IP>` | 22 |
 

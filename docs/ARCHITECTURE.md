@@ -63,12 +63,10 @@ iPhone Safari
     ▼
 ┌─────────────┐
 │   Caddy     │ (reverse proxy, auto-TLS)
-│  :443       │──────► ttyd :7681 (web terminal)
 │  :8080      │──────► code-server :8443 (VS Code)
 └─────────────┘
 ```
 
-- **ttyd**: Lightweight web terminal. Connects to the tmux session so you can switch between agents.
 - **code-server**: Full VS Code in the browser. Edit files, run terminals, use extensions.
 - **Caddy**: Handles HTTPS (Let's Encrypt or self-signed) and reverse proxies.
 
@@ -77,7 +75,7 @@ iPhone Safari
 - SSH: key-only auth, root disabled, fail2ban
 - Firewall: UFW with minimal open ports
 - VPN: Tailscale (optional, zero-trust)
-- Web services: password-protected via ttyd credentials
+- Web services: password-protected via code-server credentials
 - API keys: stored in `~/.claude-env` with 600 permissions
 
 ## Workflow

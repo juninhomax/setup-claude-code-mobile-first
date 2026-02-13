@@ -33,7 +33,6 @@ export WORK_USER
 STEPS=(
   "01-bootstrap.sh|Bootstrap OS (packages, user, swap)"
   "04-install-claude-code.sh|Node.js + Claude Code CLI"
-  "05-install-web-terminal.sh|Web terminal (ttyd + Caddy)"
   "06-install-code-server.sh|VS Code web (code-server)"
   "07-launch-agents.sh|Launch tmux multi-agents"
   "08-validate.sh|Validate setup"
@@ -149,10 +148,9 @@ for i in "${!STEPS[@]}"; do
 
   # Step 1: bootstrap (root) + tmux config
   # Step 2: claude code (user, no root)
-  # Step 3: web terminal (root)
-  # Step 4: code-server (root)
-  # Step 5: launch agents (manual)
-  # Step 6: validate (user)
+  # Step 3: code-server (root)
+  # Step 4: launch agents (manual)
+  # Step 5: validate (user)
   case $step_num in
     1)
       # Bootstrap: run as root, then install tmux config for user
@@ -171,17 +169,17 @@ for i in "${!STEPS[@]}"; do
       # Claude Code: install as user (nvm + npm)
       su -l "${WORK_USER}" -c "bash ${script_path}"
       ;;
-    5)
+    4)
       # Agents: skip auto-launch, user runs manually with --project
       echo "  -> Skipping auto-launch (run manually after setup):"
       echo "     bash ${script_path} --project /path/to/your/project"
       ;;
-    6)
+    5)
       # Validate: run as user
       su -l "${WORK_USER}" -c "bash ${script_path}"
       ;;
     *)
-      # Steps 3, 4: run as root
+      # Step 3: run as root
       bash "${script_path}"
       ;;
   esac
@@ -208,7 +206,6 @@ echo "║     bash scripts/07-launch-agents.sh \\               ║"
 echo "║       --project ~/workspace/my-project               ║"
 echo "║                                                      ║"
 echo "║  FROM YOUR IPHONE (Safari):                          ║"
-echo "║    https://<IP>/     (web terminal)     ║"
 echo "║    https://<IP>:8080 (VS Code)          ║"
 echo "║                                                      ║"
 echo "║  TMUX NAVIGATION:                                    ║"

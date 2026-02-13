@@ -32,8 +32,6 @@ export WORK_USER
 # --- Steps ---
 STEPS=(
   "01-bootstrap.sh|Bootstrap OS (packages, user, swap)"
-  "02-harden-ssh-firewall.sh|SSH hardening + UFW + fail2ban"
-  "03-install-tailscale.sh|Tailscale VPN"
   "04-install-claude-code.sh|Node.js + Claude Code CLI"
   "05-install-web-terminal.sh|Web terminal (ttyd + Caddy)"
   "06-install-code-server.sh|VS Code web (code-server)"

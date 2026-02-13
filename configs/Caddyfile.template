@@ -1,9 +1,9 @@
 # =============================================================================
-# Caddyfile.template — Reverse proxy for ttyd + code-server
+# Caddyfile.template — Reverse proxy for code-server (VS Code web)
 #
 # Usage:
 #   With domain:    replace {DOMAIN} with your domain name
-#   Without domain: use the :443 / :8080 blocks below
+#   Without domain: use the :8080 block below
 #
 # Copy to /etc/caddy/Caddyfile and reload: sudo systemctl reload caddy
 # =============================================================================
@@ -11,8 +11,8 @@
 # === OPTION 1: With a domain (Let's Encrypt auto-TLS) ===
 # Uncomment and replace {DOMAIN} with your actual domain.
 
-# {DOMAIN} {
-#     reverse_proxy 127.0.0.1:7681
+# code.{DOMAIN} {
+#     reverse_proxy 127.0.0.1:8443
 #     encode gzip
 #
 #     header {
@@ -27,32 +27,10 @@
 #         format json
 #     }
 # }
-#
-# code.{DOMAIN} {
-#     reverse_proxy 127.0.0.1:8443
-#     encode gzip
-# }
 
 # === OPTION 2: Without domain (self-signed TLS) ===
 # Works with IP access (Tailscale or public IP).
 # Accept the self-signed certificate in your browser.
-
-:443 {
-    tls internal
-    reverse_proxy 127.0.0.1:7681
-    encode gzip
-
-    header {
-        X-Content-Type-Options nosniff
-        X-Frame-Options DENY
-        Referrer-Policy no-referrer
-    }
-
-    log {
-        output file /var/log/caddy/access.log
-        format json
-    }
-}
 
 :8080 {
     tls internal

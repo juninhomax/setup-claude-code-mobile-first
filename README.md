@@ -4,10 +4,9 @@
 
 ## What you get
 
-- **Secured VM**: SSH hardening, UFW firewall, fail2ban, Tailscale VPN
+- **Secured server**: SSH hardening, UFW firewall, fail2ban, Tailscale VPN
 - **Claude Code CLI**: installed and configured with your API key
 - **9 specialized agents** in tmux tabs, each with its own model and system prompt
-- **Web terminal**: ttyd + Caddy HTTPS (Safari-friendly)
 - **Web IDE**: code-server (VS Code in the browser)
 - **Azure (optional)**: Terraform to provision the VM automatically
 
@@ -25,7 +24,7 @@
 git clone https://github.com/juninhomax/setup-claude-code-mobile-first.git
 cd setup-claude-code-mobile-first
 cp config.env.example config.env
-nano config.env   # Set ANTHROPIC_API_KEY and WEB_PASSWORD
+nano config.env   # Set ANTHROPIC_API_KEY and WEB_PASSWORD (for code-server)
 ```
 
 ### 2. Run setup
@@ -34,15 +33,12 @@ nano config.env   # Set ANTHROPIC_API_KEY and WEB_PASSWORD
 sudo bash scripts/setup.sh
 ```
 
-This runs all 8 steps:
+This runs all steps:
 1. Bootstrap OS (packages, user, swap)
-2. SSH hardening + UFW + fail2ban
-3. Tailscale VPN (optional)
-4. Node.js + Claude Code CLI
-5. Web terminal (ttyd + Caddy)
-6. code-server (VS Code web)
-7. _(agents launched manually)_
-8. Validation
+2. Node.js + Claude Code CLI
+3. code-server (VS Code web)
+4. _(agents launched manually)_
+5. Validation
 
 ### 2b. Configure API key (skip OAuth)
 
@@ -68,7 +64,6 @@ bash scripts/07-launch-agents.sh --project ~/workspace/my-project
 
 | Service | URL | Auth |
 |---------|-----|------|
-| Web terminal | `https://<IP>/` | user / your WEB_PASSWORD |
 | VS Code | `https://<IP>:8080/` | your WEB_PASSWORD |
 
 ## Agents

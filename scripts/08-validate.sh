@@ -112,8 +112,6 @@ echo ""
 
 # --- Optional services ---
 echo "=== OPTIONAL SERVICES ==="
-warn_check "ttyd installed" "command -v ttyd"
-warn_check "ttyd service active" "systemctl is-active ttyd"
 warn_check "Caddy installed" "command -v caddy"
 warn_check "Caddy service active" "systemctl is-active caddy"
 warn_check "code-server installed" "command -v code-server"
@@ -122,7 +120,7 @@ echo ""
 # --- Ports ---
 echo "=== LISTENING PORTS ==="
 echo "  (ss -lntp)"
-sudo ss -lntp 2>/dev/null | grep -E '(22|443|7681|8443|8080)' | sed 's/^/    /' || echo "  (cannot list ports)"
+sudo ss -lntp 2>/dev/null | grep -E '(22|8443|8080)' | sed 's/^/    /' || echo "  (cannot list ports)"
 echo ""
 
 # --- Summary ---
@@ -140,9 +138,7 @@ echo ""
 echo "=== DEBUG COMMANDS ==="
 echo "  systemctl status sshd"
 echo "  systemctl status fail2ban"
-echo "  systemctl status ttyd"
 echo "  systemctl status caddy"
-echo "  journalctl -u ttyd -f"
 echo "  journalctl -u caddy -f"
 echo "  sudo ufw status verbose"
 echo "  sudo ss -lntp"

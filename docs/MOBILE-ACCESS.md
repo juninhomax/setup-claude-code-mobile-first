@@ -2,27 +2,20 @@
 
 ## Accessing from iPhone/iPad
 
-### Option 1: Web terminal (Safari)
+### Option 1: VS Code web (Safari)
 
 1. Open Safari on your iPhone
-2. Go to `https://<your-server-ip>/`
+2. Go to `https://<your-server-ip>:8080/`
 3. Accept the self-signed certificate (if no domain)
-4. Login: `user` / your `WEB_PASSWORD`
-5. You're now in a tmux session
+4. Enter your `WEB_PASSWORD`
+5. Full VS Code experience in the browser
 
 **Tips for Safari:**
 - Add to Home Screen for a full-screen app-like experience
+- Use the integrated terminal in VS Code to access tmux
 - The tmux prefix is `Ctrl+A` (easier to type on mobile than `Ctrl+B`)
-- Use the tree view (`Ctrl+A, w`) to see all agents at once
-- Tap on a window name in the status bar to switch
 
-### Option 2: VS Code web (Safari)
-
-1. Go to `https://<your-server-ip>:8080/`
-2. Enter your `WEB_PASSWORD`
-3. Full VS Code experience in the browser
-
-### Option 3: SSH client app
+### Option 2: SSH client app
 
 Recommended apps:
 - **Termius** (free tier available)
@@ -41,7 +34,7 @@ Then attach to the tmux session:
 tmux attach -t claude-agents
 ```
 
-### Option 4: Tailscale (recommended for security)
+### Option 3: Tailscale (recommended for security)
 
 1. Install Tailscale on your iPhone (App Store)
 2. Login with the same account as your server
@@ -78,7 +71,6 @@ tmux attach -t claude-agents
 
 ### Connection drops
 - tmux preserves your session — just reconnect
-- ttyd has ping-interval to keep connections alive
 - Use `tmux attach -t claude-agents` after reconnecting
 
 ### Small screen layout
